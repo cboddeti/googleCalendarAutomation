@@ -27,7 +27,7 @@ def main():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'C:/Users/chait/Documents/GitHub/helloWorld/GoogleCalenderAutomation/credentials.json', SCOPES)
+                'C:/Users/chait/Documents/creds/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
@@ -37,7 +37,7 @@ def main():
 
     # Call the Calendar API
     # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Creating an event')
+    print('Creating an event') 
     event1 = { 
             'summary': 'House of Cards',
             'creator': {'displayName':'Frank Underwood', 'self' : True, 'email':'technicalanalytical2021@gmail.com'},
