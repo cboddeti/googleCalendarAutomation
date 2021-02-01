@@ -7,14 +7,10 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-# If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 
 def main():
-    """Shows basic usage of the Google Calendar API.
-    Prints the start and name of the next 10 events on the user's calendar.
-    """
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -27,8 +23,7 @@ def main():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'C:/Users/chait/Documents/creds/credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file('C:/Users/chait/Documents/creds/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
@@ -36,9 +31,7 @@ def main():
 
     service = build('calendar', 'v3', credentials=creds)
 
-    # Call the Calendar API
-    # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-
+    # Call the `Calendar API
     csvFile = open('scheduleFile.csv','r')
 
     readerFile = list(csv.reader(csvFile,delimiter=','))
@@ -56,6 +49,8 @@ def main():
                 'attendees': [{'displayName':'Doug Stamper','email':'chaitanyaprasad1111@gmail.com'}],
                 'visibility': 'private',
                 'locked': True,
+                'sendUpdates': True,
+                #'colorId':'#f6c026',
                 'guestsCanSeeOtherGuests': False,
                 'start' : {'dateTime': startDateTime, 'timeZone': 'America/New_York'}, 
                 'end' :   {'dateTime': endDateTime, 'timeZone': 'America/New_York'}
