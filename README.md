@@ -1,1 +1,1 @@
-Automate event creation based on data from a csv file
+Automate Google calender events creation based on schedule data from a csv file
