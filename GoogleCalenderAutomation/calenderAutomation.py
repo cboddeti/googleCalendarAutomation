@@ -49,15 +49,16 @@ def main():
         print('No access to the Appointment Calendar')
 
     # Call the `Calendar API
-    csvFile = open('scheduleFile.csv','r')
+    csvFile = open(sys.argv[1],'r')
 
     readerFile = list(csv.reader(csvFile,delimiter=','))
     sortedlist = sorted(readerFile[1:], key=lambda row: row[0], reverse=False)
+    dateSubClass = datetime.datetime
 
     for row in sortedlist:
         print('Creating an event')
-        startDateTime = datetime.datetime.strptime(row[1], "%d-%m-%Y %H:%M").isoformat()
-        endDateTime = (datetime.datetime.strptime(row[1], "%d-%m-%Y %H:%M") + datetime.timedelta(minutes=30)).isoformat()
+        startDateTime = dateSubClass.strptime(row[1], "%d-%m-%Y %H:%M").isoformat()
+        endDateTime = (dateSubClass.strptime(row[1], "%d-%m-%Y %H:%M") + datetime.timedelta(minutes=30)).isoformat()
         event = { 
                 'summary': 'MD Install',
                 'description': row[1] + ' ' + row[2],
@@ -71,9 +72,7 @@ def main():
 
         events_result = service.events().insert(calendarId=apptCalendarId, sendNotifications = True, body= event).execute()
     
-        print(''' %s Event added:
-                Start: %s
-                End: %s''' %(events_result['description'],events_result['start']['dateTime'],events_result['end']['dateTime']))
+        print(''' %s Event added ''' %events_result['description'])
 
 if __name__ == '__main__':
     main()
