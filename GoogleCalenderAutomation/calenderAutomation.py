@@ -3,9 +3,11 @@ import csv
 import datetime
 import pickle
 import os.path
+import sys
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+import pandas as pd
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
@@ -31,6 +33,21 @@ def main():
 
     service = build('calendar', 'v3', credentials=creds)
 
+    print('Getting the calendar id of Appointments')
+    calendars_result = service.calendarList().list().execute()
+    calendars = calendars_result.get('items', [])
+
+    if not calendars:
+        print('No calendars found.')
+    for calendar in calendars:
+        summary = calendar['summary']
+        if(summary=='Appointments'):
+            apptCalendarId = calendar['id']
+            print(apptCalendarId)
+    
+    if not apptCalendarId:
+        print('No access to the Appointment Calendar')
+
     # Call the `Calendar API
     csvFile = open('scheduleFile.csv','r')
 
@@ -39,36 +56,24 @@ def main():
 
     for row in sortedlist:
         print('Creating an event')
-        dateTimeSplit= row[1].split(' ')
-        dateSplit = dateTimeSplit[0].split('-')
-        startDateTime = (dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0])+ 'T' + (dateTimeSplit[1].split(':')[0] + ':00:00')
-        endDateTime =  (dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0])+ 'T' + (dateTimeSplit[1].split(':')[0] + ':30:00')
-        event1 = { 
-                'summary': row[2],
-                'creator': {'displayName':'Intellastar', 'self' : True, 'email':'technicalanalytical2021@gmail.com'},
-                'attendees': [{'displayName':'Doug Stamper','email':'chaitanyaprasad1111@gmail.com'}],
-                'visibility': 'private',
-                'locked': True,
+        startDateTime = datetime.datetime.strptime(row[1], "%d-%m-%Y %H:%M").isoformat()
+        endDateTime = (datetime.datetime.strptime(row[1], "%d-%m-%Y %H:%M") + datetime.timedelta(minutes=30)).isoformat()
+        event = { 
+                'summary': 'MD Install',
+                'description': row[1] + ' ' + row[2],
+                'creator': {'displayName':'Doug', 'email':'technicalanalytical2021@gmail.com'},
                 'sendUpdates': True,
-                #'colorId':'#f6c026',
-                'guestsCanSeeOtherGuests': False,
+                'guestsCanSeeOtherGuests': True,
                 'start' : {'dateTime': startDateTime, 'timeZone': 'America/New_York'}, 
-                'end' :   {'dateTime': endDateTime, 'timeZone': 'America/New_York'}
+                'end' :   {'dateTime': endDateTime, 'timeZone': 'America/New_York'},
+                'reminders': {'useDefault': False, 'overrides': [{'method': 'popup', 'minutes': 15}]}
                 }
 
-        
-        events_result = service.events().insert(calendarId='primary', sendNotifications = True, body= event1).execute()
+        events_result = service.events().insert(calendarId=apptCalendarId, sendNotifications = True, body= event).execute()
     
-        print(''' %r event added:
+        print(''' %s Event added:
                 Start: %s
-                End: %s''' %(events_result['summary'].encode('utf-8'),events_result['start']['dateTime'],events_result['end']['dateTime']))
-
-    # if not events:
-    #     print('No upcoming events found.')
-    # for event in events:
-    #     start = event['start'].get('dateTime', event['start'].get('date'))
-    #     print(start, event['summary'])
-
+                End: %s''' %(events_result['description'],events_result['start']['dateTime'],events_result['end']['dateTime']))
 
 if __name__ == '__main__':
     main()
